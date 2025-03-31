@@ -5,9 +5,16 @@ from rest_framework.views import APIView
 from .serializers import SignupSerializer, LoginSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
+from django.shortcuts import render
+
+def login_page(request):
+    return render(request, 'login.html')
+
+def signup_page(request):
+    return render(request, 'signup.html')
 
 class SignupView(APIView):
-    permission_classes = [AllowAny]  # Allow unauthenticated access
+    permission_classes = [AllowAny]  
 
     def post(self, request):
         serializer = SignupSerializer(data=request.data)
@@ -23,7 +30,7 @@ class LoginView(APIView):
         serializer = LoginSerializer(data=request.data, context={'request': request})
         if serializer.is_valid(raise_exception=True):
             user = serializer.validated_data
-            refresh = RefreshToken.for_user(user)  # Use RefreshToken
+            refresh = RefreshToken.for_user(user)
             return Response({
                 'refresh': str(refresh),
                 'access': str(refresh.access_token),
