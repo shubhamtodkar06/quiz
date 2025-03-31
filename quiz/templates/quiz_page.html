@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quiz</title>
+</head>
+<body>
+    <h1>Quiz Time!</h1>
+    <button id="startQuizBtn">Start Quiz</button>
+    <div id="quizContainer" style="display: none;">
+        <div id="questionContainer"></div>
+        <button id="submitQuizBtn">Submit Quiz</button>
+    </div>
+    <div id="resultsContainer" style="display: none;">
+        <h2>Quiz Results</h2>
+        <p id="scoreDisplay"></p>
+    </div>
+    <h2>Quiz History</h2>
+    <div id="historyContainer"></div>
+
+    <script>
+        const startQuizBtn = document.getElementById('startQuizBtn');
+        const quizContainer = document.getElementById('quizContainer');
+        const questionContainer = document.getElementById('questionContainer');
+        const submitQuizBtn = document.getElementById('submitQuizBtn');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const historyContainer = document.getElementById('historyContainer');
+
+        let questions = [];
+        let userAnswers = {};
+
+        startQuizBtn.addEventListener('click', startQuiz);
+        submitQuizBtn.addEventListener('click', submitQuiz);
+
+        function startQuiz() {
+            startQuizBtn.style.display = 'none';
+            quizContainer.style.display = 'block';
+            questionContainer.innerHTML = '';
+            questions = [];
+            userAnswers = {};
+
+            const token = localStorage.getItem('access_token'); // Replace with your actual token retrieval method
+            if (!token) {
+                alert('Please log in to take the quiz.');
+                return;
+            }
+
+            fetch('/api/quiz/start/', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                questions = data;
+                displayQuestions();
+            })
+            .catch(error => console.error('Error fetching questions:', error));
+        }
+
+        function displayQuestions() {
+            questions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.innerHTML = `<h3>${index + 1}. ${question.question_text}</h3>`;
+                question.options.forEach(option => {
+                    const input = document.createElement('input');
+                    input.type = 'radio';
+                    input.name = `question-${question.id}`;
+                    input.value = option;
+                    input.id = `question-${question.id}-${option.replace(/ /g, '_')}`; // Create unique ID
+                    const label = document.createElement('label');
+                    label.textContent = option;
+                    label.htmlFor = input.id;
+                    questionDiv.appendChild(input);
+                    questionDiv.appendChild(label);
+                    questionDiv.appendChild(document.createElement('br'));
+                });
+                questionContainer.appendChild(questionDiv);
+            });
+        }
+
+        function submitQuiz() {
+            const answers = {};
+            questions.forEach(question => {
+                const selectedOption = document.querySelector(`input[name="question-${question.id}"]:checked`);
+                if (selectedOption) {
+                    answers[question.id] = selectedOption.value;
+                }
+            });
+
+            const token = localStorage.getItem('access_token'); // Replace with your actual token retrieval method
+            if (!token) {
+                alert('Please log in to submit the quiz.');
+                return;
+            }
+
+            fetch('/api/quiz/submit/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ answers: answers })
+            })
+            .then(response => response.json())
+            .then(data => {
+                quizContainer.style.display = 'none';
+                resultsContainer.style.display = 'block';
+                scoreDisplay.textContent = `Your score: ${data.score} out of ${questions.length}`;
+                fetchQuizHistory(); // Fetch history after submitting
+            })
+            .catch(error => console.error('Error submitting quiz:', error));
+        }
+
+        function fetchQuizHistory() {
+            historyContainer.innerHTML = 'Loading quiz history...';
+            const token = localStorage.getItem('access_token'); // Replace with your actual token retrieval method
+            if (!token) {
+                alert('Please log in to view quiz history.');
+                return;
+            }
+
+            fetch('/api/quiz/history/', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                historyContainer.innerHTML = '';
+                if (data && data.length > 0) {
+                    data.forEach(attempt => {
+                        const attemptDiv = document.createElement('div');
+                        attemptDiv.innerHTML = `<h3>Quiz Taken on: ${new Date(attempt.start_time).toLocaleDateString()}</h3><p>Score: ${attempt.score} out of ${attempt.questions.length}</p><hr>`;
+                        historyContainer.appendChild(attemptDiv);
+                    });
+                } else {
+                    historyContainer.textContent = 'No quiz history available.';
+                }
+            })
+            .catch(error => console.error('Error fetching quiz history:', error));
+        }
+
+        // Call fetchQuizHistory on page load to show initial history
+        fetchQuizHistory();
+    </script>
+</body>
+</html>
