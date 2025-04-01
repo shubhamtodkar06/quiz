@@ -5,10 +5,10 @@ from .models import QuizQuestion, QuizAttempt
 class QuizQuestionSerializer(serializers.ModelSerializer):
     class Meta:
         model = QuizQuestion
-        fields = ['id', 'question_text', 'options']  # Exclude correct_answer
+        fields = ['id', 'question_text', 'options']  
 
 class SubmitQuizSerializer(serializers.Serializer):
-    answers = serializers.JSONField()  # Expected format: {question_id: user_answer}
+    answers = serializers.JSONField()  
 
 class QuizAttemptSerializer(serializers.ModelSerializer):
     questions = QuizQuestionSerializer(many=True, read_only=True)

@@ -2,20 +2,129 @@
 <html>
 <head>
     <title>Quiz</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+            background-color: #f4f4f4;
+            display: flex;
+        }
+
+        .main-container {
+            display: flex;
+            width: 100%;
+        }
+
+        .history-sidebar {
+            width: 250px;
+            background-color: #e9ecef;
+            padding: 20px;
+            border-right: 1px solid #ced4da;
+            margin-right: 20px;
+            box-sizing: border-box;
+            border-radius: 5px;
+        }
+
+        .history-sidebar h2 {
+            margin-top: 0;
+            color: #343a40;
+        }
+
+        .history-sidebar div {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #ced4da;
+        }
+
+        .history-sidebar div:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .quiz-content {
+            flex-grow: 1;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-content h1 {
+            color: #007bff;
+            margin-top: 0;
+        }
+
+        .quiz-content button {
+            padding: 10px 15px;
+            margin-bottom: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .quiz-content button:hover {
+            background-color: #0056b3;
+        }
+
+        #quizContainer, #resultsContainer {
+            margin-top: 20px;
+        }
+
+        #resultsContainer h2 {
+            color: #28a745;
+        }
+
+        #questionContainer div {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        #questionContainer h3 {
+            color: #333;
+            margin-top: 0;
+        }
+
+        #questionContainer input[type="radio"] {
+            margin-right: 5px;
+        }
+
+        #questionContainer label {
+            margin-right: 15px;
+        }
+
+        #scoreDisplay {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #28a745;
+        }
+    </style>
 </head>
 <body>
-    <h1>Quiz Time!</h1>
-    <button id="startQuizBtn">Start Quiz</button>
-    <div id="quizContainer" style="display: none;">
-        <div id="questionContainer"></div>
-        <button id="submitQuizBtn">Submit Quiz</button>
+    <div class="main-container">
+        <div class="history-sidebar">
+            <h2>Quiz History</h2>
+            <div id="historyContainer">Loading quiz history...</div>
+        </div>
+        <div class="quiz-content">
+            <h1>Quiz Time!</h1>
+            <button id="startQuizBtn">Start Quiz</button>
+            <div id="quizContainer" style="display: none;">
+                <div id="questionContainer"></div>
+                <button id="submitQuizBtn">Submit Quiz</button>
+            </div>
+            <div id="resultsContainer" style="display: none;">
+                <h2>Quiz Results</h2>
+                <p id="scoreDisplay"></p>
+            </div>
+        </div>
     </div>
-    <div id="resultsContainer" style="display: none;">
-        <h2>Quiz Results</h2>
-        <p id="scoreDisplay"></p>
-    </div>
-    <h2>Quiz History</h2>
-    <div id="historyContainer"></div>
 
     <script>
         const startQuizBtn = document.getElementById('startQuizBtn');
@@ -39,7 +148,7 @@
             questions = [];
             userAnswers = {};
 
-            const token = localStorage.getItem('access_token'); // Replace with your actual token retrieval method
+            const token = localStorage.getItem('access_token');
             if (!token) {
                 alert('Please log in to take the quiz.');
                 return;
@@ -141,7 +250,6 @@
             .catch(error => console.error('Error fetching quiz history:', error));
         }
 
-        // Call fetchQuizHistory on page load to show initial history
         fetchQuizHistory();
     </script>
 </body>
